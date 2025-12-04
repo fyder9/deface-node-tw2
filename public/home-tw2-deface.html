@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Deface TW2</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        form {
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        input[type="file"] {
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Deface TW2</h1>
+
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <label>Seleziona un video (.mp4):</label><br><br>
+        <input type="file" name="video" accept="video/mp4" required><br><br>
+
+        <button type="submit">Carica & Anonimizza</button>
+    </form>
+
+</body>
+<script>
+    // Aggiungi qui eventuali script JavaScript se necessario
+</script>
+
+</html>

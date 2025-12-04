@@ -1,0 +1,30 @@
+# Node dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Video upload folders
+uploads/
+outputs/
+
+# Optional
+*.mp4
+*.avi
+*.mov
+
+# Lock files
+package-lock.json
+
+# Conda environment backups (if ever created)
+*.yml
