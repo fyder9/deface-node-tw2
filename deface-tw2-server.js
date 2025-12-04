@@ -30,7 +30,7 @@ app.post('/upload', upload.single('video'), (req, res) => { //file upload endpoi
     }
     const inputPath = req.file.path;
     const outputName = 'defaced-' + req.file.filename;
-    const outputPath = oath.join(outputFolder, outputName);
+    const outputPath = path.join(outputFolder, outputName);
     const pythonPath = config.pythonPath
     const args = ["deface", inputPath, "-o", outputPath, "--backend", "onnxrt", "--execution-provider", "DmlExecutionProvider"];
     const childProcess = spawn(config.pythonPath, args);
@@ -57,6 +57,7 @@ app.post('/upload', upload.single('video'), (req, res) => { //file upload endpoi
         }
     });
 });
+
 //////
 app.listen(3100, () => { //start server
     console.log('Server is running on port 3100');
