@@ -32,7 +32,9 @@ app.post('/upload', upload.single('video'), (req, res) => { //file upload endpoi
     const outputName = 'defaced-' + req.file.filename;
     const outputPath = path.join(outputFolder, outputName);
     const pythonPath = config.pythonPath
-    const args = ["deface", inputPath, "-o", outputPath, "--backend", "onnxrt", "--execution-provider", "DmlExecutionProvider"];
+    //const args = [inputPath, "-o", outputPath, "--backend", "onnxrt", "--execution-provider", "DmlExecutionProvider"];
+    const args = [inputPath, "-o", outputPath];
+
     const childProcess = spawn(config.pythonPath, args);
 
 
@@ -41,7 +43,7 @@ app.post('/upload', upload.single('video'), (req, res) => { //file upload endpoi
     });
 
     childProcess.stderr.on("data", data => {
-        console.error("DEFACE ERROR:", data.toString());
+        console.error("DEFACE SERVER ERROR:", data.toString());
     });
 
     childProcess.on("close", code => {
