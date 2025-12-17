@@ -22,11 +22,11 @@ app.use(express.json());
 app.use("/outputs", express.static(path.join(__dirname, "outputs")));
 //////
 app.get('/', (req, res) => { //serve homepage
-    res.sendFile(__dirname + '/public/home-tw2-deface.html');
+    res.sendFile(__dirname + '/public/home-deface.html');
 });
 app.post('/upload', upload.single('video'), (req, res) => { //file upload endpoint
     if (!req.file) {
-        return res.status(400).send('No file uploaded.');
+        return res.status(400).json({ ok: false, message: 'No file uploaded.' });
     }
     const inputPath = req.file.path;
     const outputName = 'defaced-' + req.file.filename;
@@ -40,6 +40,7 @@ app.post('/upload', upload.single('video'), (req, res) => { //file upload endpoi
 
     childProcess.stdout.on("data", data => {
         console.log("DEFACE:", data.toString());
+        //TODO:show loading percentage on frontend
     });
 
     childProcess.stderr.on("data", data => {
@@ -49,19 +50,40 @@ app.post('/upload', upload.single('video'), (req, res) => { //file upload endpoi
     childProcess.on("close", code => {
         if (code === 0) {
             console.log("Deface terminato con successo.");
-
-            return res.send(`
-            <h2>Video anonimizzato</h2>
-            <a href="/outputs/${outputName}" download>Scarica il video blur-ato</a>
-          `);
+            return res.json({ ok: true, outputName, url: `/outputs/${outputName}` });
         } else {
-            return res.status(500).send("Errore durante l'anonimizzazione.");
+            return res.status(500).json({ ok: false, message: "Errore durante l'anonimizzazione." });
         }
     });
 });
 
+app.get('/download/:filename', (req, res) => { //file download endpoint
+
+    const filename = req.params.filename;
+    if (fileName.includes("..") || fileName.includes("/") || fileName.includes("\\")) {
+        return res.status(400).json({ ok: false, message: "Invalid filename" });
+    }
+    const filePath = path.join(outputFolder, filename);
+
+    return res.download(filePath, fileName, err => {
+        if (err) {
+            return res.status(500).json({ ok: false, message: "Errore durante il download del file." });
+        }
+    })
+
+});
+
 //////
 app.listen(3100, () => { //start server
+
+    console.log(`
+    ██████╗ ███████╗███████╗ █████╗  ██████╗ ███████╗
+    ██╔══██╗██╔════╝██╔════╝██╔══██╗██╔════╝ ██╔════╝
+    ██║  ██║█████╗  █████╗  ███████║██║      █████╗  
+    ██║  ██║██╔══╝  ██╔══╝  ██╔══██║██║      ██╔══╝  
+    ██████╔╝███████╗██║     ██║  ██║╚██████╔╝███████╗
+    ╚═════╝ ╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+    `);
     console.log('Server is running on port 3100');
     console.log("http://localhost:3100");
 });
