@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DeFace</title>
+
+    <!-- React via CDN (zero build) -->
+    <script defer src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script defer src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script defer src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- link to stylesheet -->
+    <link rel="stylesheet" href="styles/home-style.css" />
+
+
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useMemo, useRef, useState, useEffect } = React;
+
+        function App() {
+            // states: idle -> selected -> processing -> done
+            const [state, setState] = useState("idle");
+            const [progress, setProgress] = useState(0);
+            const [file, setFile] = useState(null);
+            const [resultUrl, setResultUrl] = useState("");
+
+            const inputRef = useRef(null);
+
+            const hasFile = useMemo(() => !!file, [file]);
+
+            useEffect(() => {
+                if (state !== "processing") return;
+
+                const es = new EventSource("/progress");
+
+                es.onmessage = (event) => {
+                    const value = Number(event.data);
+                    if (!isNaN(value)) {
+                        setProgress(value);
+                    }
+                };
+
+                return () => {
+                    es.close();
+                };
+            }, [state]);
+
+            function openPicker() {
+                inputRef.current?.click();
+            }
+
+            function onPick(e) {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                setFile(f);
+                setState("selected");
+            }
+
+            function removeFile() {
+                setFile(null);
+                setState("idle");
+                if (inputRef.current) inputRef.current.value = "";
+            }
+
+            async function startProcess() {
+                if (!file) return;
+                setState("processing");
+
+                const form = new FormData();
+                form.append("video", file);
+                try {
+                    const res = await fetch("/upload", {
+                        method: "POST",
+                        body: form
+                    });
+                    const endSignal = await res.json();
+                    if (endSignal.ok != true) throw new Error("Upload failed");
+                    setResultUrl(endSignal.url);
+                    setState("done");
+                }
+                catch (e) {
+                    alert("Error during l'upload/processing.");
+                    setState("selected");
+                    return;
+                }
+
+            }
+
+            function resetToUpload() {
+                // nello screenshot finale si rivede "carica video"
+                // ma resti in done per scaricare/copiare: qui lo lascio in done
+                // se vuoi tornare a idle, chiama removeFile()
+                openPicker();
+            }
+
+            function downloadResult() {
+                if (!resultUrl) return;
+                window.location.href = resultUrl;
+            }
+
+            async function copyToClipboard() {
+                if (!resultUrl) return;
+                const fullUrl = window.location.origin + resultUrl;
+                try {
+                    await navigator.clipboard.writeText(fullUrl);
+                    alert("Copiato negli appunti!");
+                } catch (e) {
+                    alert("Clipboard non disponibile (http/permessi).");
+                }
+            }
+
+            return (
+                <div className="stage">
+                    <div className="card">
+                        <div className="content">
+                            <div className="brand fadeUp">
+                                <div>DeFace</div>
+                                <img src="/assets/logo-smile.png" alt="logo" />
+                            </div>
+
+                            {/* input hidden */}
+                            <input
+                                ref={inputRef}
+                                type="file"
+                                accept="video/*"
+                                style={{ display: "none" }}
+                                onChange={onPick}
+                            />
+
+                            {/* SCENE */}
+                            <div className="swap">
+                                {state === "idle" && (
+                                    <div className="stateWrap fadeUp">
+                                        <button className="uploadBtn" onClick={openPicker}>
+                                            <span>carica video</span>
+                                            <span className="plusBox">
+                                                <img src="/assets/icon-plus.png" alt="+" />
+                                            </span>
+                                        </button>
+                                    </div>
+                                )}
+
+                                {state === "selected" && (
+                                    <div className="stateWrap fadeUp">
+                                        <div className="row">
+                                            <div className="pill">
+                                                <span>video caricato</span>
+                                                <img className="thumb" src="/assets/thumb.png" alt="thumb" />
+                                            </div>
+                                            <button className="btnIcon" onClick={removeFile} aria-label="Rimuovi video">
+                                                <img src="/assets/icon-close.png" alt="X" />
+                                            </button>
+                                        </div>
+
+                                        <button className="btnBig" onClick={startProcess}>
+                                            BLUR
+                                        </button>
+                                    </div>
+                                )}
+
+                                {state === "processing" && (
+                                    <div className="stateWrap fadeUp">
+                                        <img
+                                            className={`avatar ${state === "processing" ? "processing" : ""}`}
+                                            src="/assets/avatar.png"
+                                            alt="avatar"
+                                        />
+                                        <div
+                                            className="progressShell"
+                                            aria-label="Caricamento in corso"
+                                        ><span className="progressText">{progress}%</span></div>
+                                    </div>
+                                )}
+
+                                {state === "done" && (
+                                    <div className="stateWrap fadeUp">
+                                        <button className="uploadBtn" onClick={resetToUpload}>
+                                            <span>carica video</span>
+                                            <span className="plusBox">
+                                                <img src="/assets/icon-plus.png" alt="+" />
+                                            </span>
+                                        </button>
+
+                                        <div className="row" style={{ marginTop: 6 }}>
+                                            <button className="downloadPill" onClick={downloadResult}>
+                                                <span>SCARICA</span>
+                                                <span className="circleIcon" aria-hidden="true">
+                                                    <img src="/assets/icon-download.png" alt="" />
+                                                </span>
+                                            </button>
+
+                                            <button className="circleBtn" onClick={copyToClipboard} aria-label="Copia">
+                                                <img src="/assets/icon-copy.png" alt="copy" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+</body>
+
+</html>

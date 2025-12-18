@@ -1,0 +1,474 @@
+:root {
+    --bg: #000;
+    --card: #eaf1f7;
+    --card2: #eaf1f7;
+    --top: #c7d9e6;
+    --shadow: rgba(0, 0, 0, .35);
+    --softShadow: rgba(0, 0, 0, .18);
+    --accent: #9fbad0;
+    --pill: #dbe6ef;
+    --text: #0b0b0b;
+    --muted: #2b2b2b;
+    --radius: 36px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* Layout */
+.stage {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+}
+
+.card {
+    width: min(1100px, 92vw);
+    height: min(700px, 86vh);
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: 0 28px 80px var(--shadow);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .35);
+}
+
+/* top "curved" header like screenshot */
+.card::before {
+    content: "";
+    position: absolute;
+    left: -10%;
+    top: -18%;
+    width: 120%;
+    height: 40%;
+    background: var(--top);
+    border-radius: 0 0 60% 60%;
+    filter: blur(.2px);
+}
+
+.card::after {
+    content: "";
+    position: absolute;
+    left: -5%;
+    top: 10%;
+    width: 110%;
+    height: 18%;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, .26), rgba(0, 0, 0, 0) 70%);
+    transform: translateY(-20px);
+    opacity: .35;
+    pointer-events: none;
+}
+
+.content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    padding: 40px;
+}
+
+/* Title */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-weight: 800;
+    font-size: clamp(44px, 4.2vw, 64px);
+    letter-spacing: -.02em;
+    user-select: none;
+}
+
+.brand img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    transform-origin: center;
+    /* subtle "swoosh" feel */
+    animation: smileFloat 3.2s ease-in-out infinite;
+    filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .18));
+}
+
+@keyframes smileFloat {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(-6deg);
+        opacity: .92;
+    }
+
+    50% {
+        transform: translateY(-6px) rotate(6deg);
+        opacity: 1;
+    }
+}
+
+/* Common UI */
+.row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--pill);
+    padding: 12px 16px;
+    border-radius: 14px;
+    box-shadow: 0 10px 22px var(--softShadow);
+    border: 1px solid rgba(255, 255, 255, .65);
+    font-weight: 700;
+    font-size: clamp(18px, 1.6vw, 26px);
+}
+
+.pill .rightIcon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, .06);
+    display: grid;
+    place-items: center;
+}
+
+.pill .rightIcon img {
+    width: 18px;
+    height: 18px;
+}
+
+.btnIcon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    border: none;
+    background: #d76b6b;
+    box-shadow: 0 10px 22px var(--softShadow);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: transform .14s ease, filter .14s ease;
+}
+
+.btnIcon:hover {
+    transform: translateY(-1px) scale(1.02);
+    filter: brightness(1.02);
+}
+
+.btnIcon:active {
+    transform: translateY(0) scale(.98);
+}
+
+.btnIcon img {
+    width: 18px;
+    height: 18px;
+    filter: invert(1);
+}
+
+/* Big button */
+.btnBig {
+    margin-top: 8px;
+    background: var(--accent);
+    border: none;
+    border-radius: 999px;
+    padding: 18px 54px;
+    font-weight: 900;
+    letter-spacing: .02em;
+    font-size: clamp(28px, 3vw, 46px);
+    box-shadow: 0 14px 28px var(--softShadow);
+    cursor: pointer;
+    transition: transform .16s ease, filter .16s ease;
+}
+
+.btnBig:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.02);
+}
+
+.btnBig:active {
+    transform: translateY(0) scale(.99);
+}
+
+.downloadPill {
+    background: var(--accent);
+    border: none;
+    border-radius: 999px;
+    padding: 14px 28px 14px 34px;
+    font-weight: 900;
+    font-size: clamp(18px, 1.9vw, 28px);
+    letter-spacing: .02em;
+    box-shadow: 0 14px 28px var(--softShadow);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: transform .16s ease, filter .16s ease;
+}
+
+.downloadPill:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.02);
+}
+
+.downloadPill:active {
+    transform: translateY(0) scale(.99);
+}
+
+.circleIcon {
+    width: 46px;
+    height: 46px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .8);
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(0, 0, 0, .06);
+}
+
+.circleIcon img {
+    width: 20px;
+    height: 20px;
+}
+
+.circleBtn {
+    width: 58px;
+    height: 58px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .8);
+    border: 1px solid rgba(0, 0, 0, .08);
+    box-shadow: 0 10px 22px var(--softShadow);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: transform .14s ease, filter .14s ease;
+}
+
+.circleBtn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.02);
+}
+
+.circleBtn:active {
+    transform: translateY(0) scale(.99);
+}
+
+.circleBtn img {
+    width: 22px;
+    height: 22px;
+}
+
+/* Processing state */
+.avatar {
+    width: 74px;
+    height: 74px;
+    object-fit: contain;
+    filter: drop-shadow(0 12px 18px rgba(0, 0, 0, .18));
+    animation: avatarPop .38s ease-out both;
+}
+
+@keyframes avatarPop {
+    from {
+        transform: translateY(12px) scale(.92);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.avatar.processing {
+    animation: avatarPop .38s ease-out both, avatarProcessing 1.2s ease-in-out infinite;
+}
+
+@keyframes avatarProcessing {
+    0% {
+        filter: blur(0px) brightness(1);
+        transform: scale(1.02);
+    }
+
+    25% {
+        filter: blur(1.5px) brightness(0.9);
+        transform: scale(0.98);
+    }
+
+    50% {
+        filter: blur(4px) brightness(0.9);
+        transform: scale(0.98);
+    }
+
+    75% {
+        filter: blur(2.5px) brightness(0.9);
+        transform: scale(0.98);
+    }
+
+    100% {
+        filter: blur(0px) brightness(1);
+        transform: scale(1.02);
+    }
+}
+
+.progressShell {
+    width: min(520px, 70vw);
+    height: 70px;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 14px 28px var(--softShadow);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .35);
+    animation: fadeUp .38s ease-out both;
+}
+
+.progressShell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, .45) 35%,
+            rgba(255, 255, 255, 0) 70%);
+    width: 40%;
+    transform: translateX(-120%);
+    animation: shimmer 1.2s ease-in-out infinite;
+}
+
+.progressText {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    font-size: 22px;
+    color: #0b0b0b;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-120%);
+        opacity: .65;
+    }
+
+    50% {
+        opacity: .95;
+    }
+
+    100% {
+        transform: translateX(320%);
+        opacity: .65;
+    }
+}
+
+/* Scene transitions */
+.scene {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+}
+
+.fadeUp {
+    animation: fadeUp .38s ease-out both;
+}
+
+@keyframes fadeUp {
+    from {
+        transform: translateY(14px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.swap {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Simple cross-fade between states */
+.stateWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+}
+
+/* Upload button (pill with plus square) */
+.uploadBtn {
+    background: var(--pill);
+    border: 1px solid rgba(255, 255, 255, .65);
+    border-radius: 14px;
+    padding: 12px 16px;
+    box-shadow: 0 10px 22px var(--softShadow);
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: clamp(18px, 1.7vw, 26px);
+    transition: transform .14s ease, filter .14s ease;
+}
+
+.uploadBtn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.02);
+}
+
+.uploadBtn:active {
+    transform: translateY(0) scale(.99);
+}
+
+.uploadBtn .plusBox {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, .08);
+    display: grid;
+    place-items: center;
+}
+
+.uploadBtn .plusBox img {
+    width: 18px;
+    height: 18px;
+}
+
+.thumb {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .18);
+    border: 1px solid rgba(255, 255, 255, .7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+    }
+}

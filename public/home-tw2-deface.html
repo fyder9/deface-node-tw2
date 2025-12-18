@@ -50,7 +50,7 @@
 
     <form action="/upload" method="POST" enctype="multipart/form-data">
         <label>Seleziona un video (.mp4):</label><br><br>
-        <input type="file" name="video" accept="video/mp4" required><br><br>
+        <input type="file" name="video" accept="" required><br><br>
 
         <button type="submit">Carica & Anonimizza</button>
     </form>
@@ -62,7 +62,10 @@
     </div>
 </body>
 <script>
-    // Aggiungi qui eventuali script JavaScript se necessario
+    document.querySelector('form').addEventListener('submit', function () {
+        document.getElementById('spinner').style.display = 'flex';
+        document.querySelector('button[type="submit"]').disabled = true;
+    });
 </script>
 
 </html>
