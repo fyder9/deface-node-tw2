@@ -16,6 +16,8 @@ const storage = multer.diskStorage({
     }
 });
 const upload = multer({ storage: storage });
+
+let progressClients = [];
 //////
 app.use(express.static('public'));
 app.use(express.json());
@@ -32,6 +34,7 @@ app.post('/upload', upload.single('video'), (req, res) => { //file upload endpoi
     const outputName = 'defaced-' + req.file.filename;
     const outputPath = path.join(outputFolder, outputName);
     const pythonPath = config.pythonPath
+    let lastProgress = 0;
     //const args = [inputPath, "-o", outputPath, "--backend", "onnxrt", "--execution-provider", "DmlExecutionProvider"];
     const args = [inputPath, "-o", outputPath];
 
@@ -39,12 +42,33 @@ app.post('/upload', upload.single('video'), (req, res) => { //file upload endpoi
 
 
     childProcess.stdout.on("data", data => {
-        console.log("DEFACE:", data.toString());
-        //TODO:show loading percentage on frontend
+        const pythonOutput = data.toString().trim();
+        console.log("DEFACE SERVER OUTPUT:", pythonOutput);
+        const match = pythonOutput.match(/^(\d{1,3})%/m);
+        if (match) {
+            const progress = Number(match[1]);
+            if (progress !== lastProgress) {
+                lastProgress = progress;
+                progressClients.forEach(res => {
+                    res.write(`data: ${progress}\n\n`);
+                });
+            }
+        }
     });
 
     childProcess.stderr.on("data", data => {
         console.error("DEFACE SERVER ERROR:", data.toString());
+        const pythonOutput = data.toString().trim();
+        const match = pythonOutput.match(/^(\d{1,3})%/m);
+        if (match) {
+            const progress = Number(match[1]);
+            if (progress !== lastProgress) {
+                lastProgress = progress;
+                progressClients.forEach(res => {
+                    res.write(`data: ${progress}\n\n`);
+                });
+            }
+        }
     });
 
     childProcess.on("close", code => {
@@ -72,7 +96,19 @@ app.get('/download/:filename', (req, res) => { //file download endpoint
     })
 
 });
+app.get("/progress", (req, res) => { //progress endpoint
 
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    res.write("\n");
+    progressClients.push(res);
+    req.on("close", () => {
+        console.log("Progress client disconnected");
+        progressClients = progressClients.filter(client => client !== res);
+    });
+});
 //////
 app.listen(3100, () => { //start server
 
@@ -83,6 +119,7 @@ app.listen(3100, () => { //start server
     ██║  ██║██╔══╝  ██╔══╝  ██╔══██║██║      ██╔══╝  
     ██████╔╝███████╗██║     ██║  ██║╚██████╔╝███████╗
     ╚═════╝ ╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+    Powered by TW2 Deface Module
     `);
     console.log('Server is running on port 3100');
     console.log("http://localhost:3100");

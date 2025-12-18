@@ -294,6 +294,37 @@ body {
     }
 }
 
+.avatar.processing {
+    animation: avatarPop .38s ease-out both, avatarProcessing 1.2s ease-in-out infinite;
+}
+
+@keyframes avatarProcessing {
+    0% {
+        filter: blur(0px) brightness(1);
+        transform: scale(1.02);
+    }
+
+    25% {
+        filter: blur(1.5px) brightness(0.9);
+        transform: scale(0.98);
+    }
+
+    50% {
+        filter: blur(4px) brightness(0.9);
+        transform: scale(0.98);
+    }
+
+    75% {
+        filter: blur(2.5px) brightness(0.9);
+        transform: scale(0.98);
+    }
+
+    100% {
+        filter: blur(0px) brightness(1);
+        transform: scale(1.02);
+    }
+}
+
 .progressShell {
     width: min(520px, 70vw);
     height: 70px;
@@ -317,6 +348,16 @@ body {
     width: 40%;
     transform: translateX(-120%);
     animation: shimmer 1.2s ease-in-out infinite;
+}
+
+.progressText {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    font-size: 22px;
+    color: #0b0b0b;
 }
 
 @keyframes shimmer {

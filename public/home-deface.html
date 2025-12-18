@@ -21,17 +21,35 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useMemo, useRef, useState } = React;
+        const { useMemo, useRef, useState, useEffect } = React;
 
         function App() {
             // states: idle -> selected -> processing -> done
             const [state, setState] = useState("idle");
+            const [progress, setProgress] = useState(0);
             const [file, setFile] = useState(null);
             const [resultUrl, setResultUrl] = useState("");
 
             const inputRef = useRef(null);
 
             const hasFile = useMemo(() => !!file, [file]);
+
+            useEffect(() => {
+                if (state !== "processing") return;
+
+                const es = new EventSource("/progress");
+
+                es.onmessage = (event) => {
+                    const value = Number(event.data);
+                    if (!isNaN(value)) {
+                        setProgress(value);
+                    }
+                };
+
+                return () => {
+                    es.close();
+                };
+            }, [state]);
 
             function openPicker() {
                 inputRef.current?.click();
@@ -148,8 +166,15 @@
 
                                 {state === "processing" && (
                                     <div className="stateWrap fadeUp">
-                                        <img className="avatar" src="/assets/avatar.png" alt="avatar" />
-                                        <div className="progressShell" aria-label="Caricamento in corso"></div>
+                                        <img
+                                            className={`avatar ${state === "processing" ? "processing" : ""}`}
+                                            src="/assets/avatar.png"
+                                            alt="avatar"
+                                        />
+                                        <div
+                                            className="progressShell"
+                                            aria-label="Caricamento in corso"
+                                        ><span className="progressText">{progress}%</span></div>
                                     </div>
                                 )}
 
