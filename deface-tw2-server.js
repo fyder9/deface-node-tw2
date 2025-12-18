@@ -35,8 +35,8 @@ app.post('/upload', upload.single('video'), (req, res) => { //file upload endpoi
     const outputPath = path.join(outputFolder, outputName);
     const pythonPath = config.pythonPath
     let lastProgress = 0;
-    //const args = [inputPath, "-o", outputPath, "--backend", "onnxrt", "--execution-provider", "DmlExecutionProvider"];
-    const args = [inputPath, "-o", outputPath];
+    const args = [inputPath, "-o", outputPath, "--backend", "onnxrt", "--execution-provider", "DmlExecutionProvider"];
+    //const args = [inputPath, "-o", outputPath];
 
     const childProcess = spawn(config.pythonPath, args);
 
