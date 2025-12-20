@@ -4,10 +4,19 @@ const config = require('./config');
 const path = require('path');
 const multer = require('multer');
 const { spawn } = require('child_process');
+const fs = require("fs");
 const app = express();
 //////
 const uploadFolder = path.join(__dirname, 'uploads');
 const outputFolder = path.join(__dirname, 'outputs');
+
+if (!fs.existsSync(uploadFolder)) {
+    fs.mkdirSync(uploadFolder, { recursive: true });
+}
+
+if (!fs.existsSync(outputFolder)) {
+    fs.mkdirSync(outputFolder, { recursive: true });
+}
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, uploadFolder),
     filename: (req, file, cb) => {
