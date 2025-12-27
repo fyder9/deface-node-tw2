@@ -1,4 +1,25 @@
 {
-    "pythonPath": "C:\\Users\\Administrator\\miniconda3\\Scripts\\deface.exe",
-    "ciao": "mondo"
+    "deface": {
+        "cmd": {
+            "win32": "%USERPROFILE%\\miniconda3\\Scripts\\deface.exe",
+            "darwin": "deface",
+            "linux": "deface"
+        },
+        "args": {
+            "win32": [
+                "--backend",
+                "onnxrt",
+                "--execution-provider",
+                "DmlExecutionProvider"
+            ],
+            "darwin": [
+                "--backend",
+                "onnxrt"
+            ],
+            "linux": [
+                "--backend",
+                "onnxrt"
+            ]
+        }
+    }
 }

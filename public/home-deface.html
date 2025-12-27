@@ -6,12 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DeFace</title>
 
-    <!-- React via CDN (zero build) -->
     <script defer src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script defer src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script defer src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- link to stylesheet -->
     <link rel="stylesheet" href="styles/home-style.css" />
 
 
@@ -29,6 +27,15 @@
             const [progress, setProgress] = useState(0);
             const [file, setFile] = useState(null);
             const [resultUrl, setResultUrl] = useState("");
+            ///////
+            const [menuOpen, setMenuOpen] = useState(false);
+            const [outputs, setOutputs] = useState([]);
+            const [loadingOutputs, setLoadingOutputs] = useState(false);
+            const [outputsError, setOutputsError] = useState(null);
+            const OUTPUTS_ENDPOINT = "/outputs";
+            const DELETE_OUTPUT_ENDPOINT = "/delete-output";
+            const DOWNLOAD_OUTPUT_ENDPOINT = "/download-output";
+            ///////
 
             const inputRef = useRef(null);
 
@@ -93,9 +100,6 @@
             }
 
             function resetToUpload() {
-                // nello screenshot finale si rivede "carica video"
-                // ma resti in done per scaricare/copiare: qui lo lascio in done
-                // se vuoi tornare a idle, chiama removeFile()
                 openPicker();
             }
 
@@ -114,10 +118,72 @@
                     alert("Clipboard non disponibile (http/permessi).");
                 }
             }
+            async function loadOutputsDirectory() {
+                setLoadingOutputs(true);
+                setOutputsError("");
+                try {
+                    const res = await fetch(OUTPUTS_ENDPOINT);
+                    const data = await res.json();
+                    console.log(data);
+                    if (!res.ok || data.ok !== true) throw new Error(data.message || "Errore lista outputs");
+                    setOutputs(data.files.map(f => f.filename));
+                } catch (e) {
+                    setOutputsError(e.message);
+                } finally {
+                    setLoadingOutputs(false);
+                }
+            }
+
+            function openMenu() {
+                if (!menuOpen) {
+                    setMenuOpen(true);
+                    loadOutputsDirectory();
+                }
+            }
+            function closeMenu() {
+                setMenuOpen(false);
+            }
 
             return (
                 <div className="stage">
                     <div className="card">
+                        <button className="menuBtn" onClick={openMenu} aria-label="Apri menu">
+                            ☰
+                        </button>
+                        {menuOpen && (
+                            <>
+                                <div className="backdrop" onClick={closeMenu} />
+                                <aside className="sidebar">
+                                    <div className="sidebarHeader">
+                                        <div className="sidebarTitle">Menu</div>
+                                        <button className="sidebarClose" onClick={closeMenu} aria-label="Chiudi menu">✕</button>
+                                    </div>
+
+                                    <div className="sidebarSection">
+                                        <div className="sidebarSectionTitle">Outputs</div>
+
+                                        {loadingOutputs && <div className="sidebarHint">Caricamento...</div>}
+                                        {outputsError && <div className="sidebarError">{outputsError}</div>}
+
+                                        {!loadingOutputs && !outputsError && outputs.length === 0 && (
+                                            <div className="sidebarHint">Nessun file in outputs.</div>
+                                        )}
+
+                                        <div className="fileList">
+                                            {outputs.map((name) => (
+                                                <a
+                                                    key={name}
+                                                    className="fileItem"
+                                                    href={`${DOWNLOAD_OUTPUT_ENDPOINT}?name=${encodeURIComponent(name)}`}
+                                                >
+                                                    {name}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </aside>
+                            </>
+                        )}
                         <div className="content">
                             <div className="brand fadeUp">
                                 <div>DeFace</div>
@@ -210,6 +276,7 @@
         }
 
         ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
     </script>
 </body>
 

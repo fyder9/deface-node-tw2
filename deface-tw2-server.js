@@ -7,6 +7,27 @@ const { spawn } = require('child_process');
 const fs = require("fs");
 const app = express();
 //////
+//os hw aware
+const platform = process.platform; //windows, linux, darwin
+const defaceCfg = config.deface || {};
+const cmdMap = defaceCfg.cmd || {};
+const argsMap = defaceCfg.args || {};
+
+let defaceCmd = cmdMap[platform] || defaceCfg.cmdDefault || "deface";
+let extraArgs = argsMap[platform] || defaceCfg.argsDefault || [];
+
+if (platform === "win32" && defaceCmd.includes("%USERPROFILE%")) {
+    defaceCmd = defaceCmd.replace(
+        "%USERPROFILE%",
+        process.env.USERPROFILE
+    );
+}
+if (platform === "win32" && defaceCmd.includes(":\\") && !fs.existsSync(defaceCmd)) { //fallback for windows full path
+    console.warn("deface.exe non trovato, fallback a 'deface' dal PATH:", defaceCmd);
+    defaceCmd = path.resolve(defaceCmd);
+}
+
+//////
 const uploadFolder = path.join(__dirname, 'uploads');
 const outputFolder = path.join(__dirname, 'outputs');
 
@@ -44,10 +65,13 @@ app.post('/upload', upload.single('video'), (req, res) => { //file upload endpoi
     const outputPath = path.join(outputFolder, outputName);
     const pythonPath = config.pythonPath
     let lastProgress = 0;
-    const args = [inputPath, "-o", outputPath, "--backend", "onnxrt", "--execution-provider", "DmlExecutionProvider"];
-    //const args = [inputPath, "-o", outputPath];
 
-    const childProcess = spawn(config.pythonPath, args);
+    const args = [inputPath, "-o", outputPath, ...extraArgs];
+
+    console.log("DEFACE CMD:", defaceCmd);
+    console.log("DEFACE ARGS:", args.join(" "));
+
+    const childProcess = spawn(defaceCmd, args);
 
 
     childProcess.stdout.on("data", data => {
@@ -90,7 +114,7 @@ app.post('/upload', upload.single('video'), (req, res) => { //file upload endpoi
     });
 });
 
-app.get('/download/:filename', (req, res) => { //file download endpoint
+app.get('/download-outputs', (req, res) => { //file download endpoint
 
     const filename = req.params.filename;
     if (fileName.includes("..") || fileName.includes("/") || fileName.includes("\\")) {
@@ -104,6 +128,24 @@ app.get('/download/:filename', (req, res) => { //file download endpoint
         }
     })
 
+});
+app.get('/outputs', (req, res) => {
+    //list output files endpoint
+    try {
+        fs.readdir(outputFolder, (err, files) => {
+            if (err) {
+                return res.status(500).json({ ok: false, message: "Errore durante la lettura dei file." });
+            }
+            const outputFilesList = files.map(file => (
+                { filename: file, url: `../outputs/${file}` }
+            ))
+            return res.json({ ok: true, files: outputFilesList });
+        });
+
+    }
+    catch (err) {
+        return res.status(500).json({ ok: false, message: "Errore durante la lettura dei file." });
+    }
 });
 app.get("/progress", (req, res) => { //progress endpoint
 
