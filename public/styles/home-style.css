@@ -626,3 +626,29 @@ body {
     filter: brightness(1.02);
     transform: translateY(-1px);
 }
+
+.fileRow {
+    display: flex;
+    filter: brightness(1.02);
+    transform: translateY(-1px);
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.fileDownloadBtn {
+    border: none;
+    background: rgba(0, 0, 0, .08);
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.fileDeleteBtn {
+    border: none;
+    background: #d76b6b;
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    color: #fff;
+}

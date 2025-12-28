@@ -32,7 +32,7 @@
             const [outputs, setOutputs] = useState([]);
             const [loadingOutputs, setLoadingOutputs] = useState(false);
             const [outputsError, setOutputsError] = useState(null);
-            const OUTPUTS_ENDPOINT = "/outputs";
+            const OUTPUTS_ENDPOINT = "/list-";
             const DELETE_OUTPUT_ENDPOINT = "/delete-output";
             const DOWNLOAD_OUTPUT_ENDPOINT = "/download-output";
             ///////
@@ -133,6 +133,37 @@
                     setLoadingOutputs(false);
                 }
             }
+            async function deleteOutputFile(filename) {
+                try {
+                    const res = await fetch(`${DELETE_OUTPUT_ENDPOINT}?name=${encodeURIComponent(filename)}`, {
+                        method: "DELETE"
+                    });
+                    const data = await res.json();
+                    if (!res.ok || data.ok !== true) throw new Error(data.message || "Errore eliminazione file");
+                    // Ricarica la lista dei file
+                    loadOutputsDirectory();
+                } catch (e) {
+                    alert(`Errore eliminazione file: ${e.message}`);
+                }
+            }
+            async function downloadOutput(filename) {
+                try {
+                    const res = await fetch(`${DOWNLOAD_OUTPUT_ENDPOINT}?name=${encodeURIComponent(filename)}`);
+                    if (!res.ok) throw new Error("Errore download file");
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                } catch (e) {
+                    alert(`Errore download file: ${e.message}`);
+                }
+
+            }
 
             function openMenu() {
                 if (!menuOpen) {
@@ -171,13 +202,22 @@
 
                                         <div className="fileList">
                                             {outputs.map((name) => (
-                                                <a
-                                                    key={name}
-                                                    className="fileItem"
-                                                    href={`${DOWNLOAD_OUTPUT_ENDPOINT}?name=${encodeURIComponent(name)}`}
-                                                >
-                                                    {name}
-                                                </a>
+                                                <div key={name} className="fileRow">
+                                                    <span className="fileName">{name}</span>
+
+                                                    <button
+                                                        className="fileDownloadBtn"
+                                                        onClick={() => downloadOutput(name)}
+                                                    >
+                                                        ⬇
+                                                    </button>
+                                                    <button
+                                                        className="fileDeleteBtn"
+                                                        onClick={() => deleteOutputFile(name)}
+                                                    >
+                                                        <a href="../assets/icon-close">✕</a>
+                                                    </button>
+                                                </div>
                                             ))}
                                         </div>
                                     </div>

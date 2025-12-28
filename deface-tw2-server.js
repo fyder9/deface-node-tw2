@@ -129,7 +129,7 @@ app.get('/download-outputs', (req, res) => { //file download endpoint
     })
 
 });
-app.get('/outputs', (req, res) => {
+app.get('/list-outputs', (req, res) => {
     //list output files endpoint
     try {
         fs.readdir(outputFolder, (err, files) => {
@@ -146,6 +146,19 @@ app.get('/outputs', (req, res) => {
     catch (err) {
         return res.status(500).json({ ok: false, message: "Errore durante la lettura dei file." });
     }
+});
+app.get('/delete-output', (req, res) => { //delete output file endpoint
+    const filename = req.query.filename;
+    if (filename.includes("..") || filename.includes("/") || filename.includes("\\")) {
+        return res.status(400).json({ ok: false, message: "Invalid filename" });
+    }
+    const filePath = path.join(outputFolder, filename);
+    fs.unlink(filePath, err => {
+        if (err) {
+            return res.status(500).json({ ok: false, message: "Errore durante l'eliminazione del file." });
+        }
+        return res.json({ ok: true, message: "File eliminato con successo." });
+    });
 });
 app.get("/progress", (req, res) => { //progress endpoint
 
