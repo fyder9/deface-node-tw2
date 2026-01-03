@@ -56,12 +56,13 @@ app.use("/outputs", express.static(path.join(__dirname, "outputs")));
 app.get('/', (req, res) => { //serve homepage
     res.sendFile(__dirname + '/public/home-deface.html');
 });
+//////
 app.post('/upload', upload.single('video'), (req, res) => { //file upload endpoint
     if (!req.file) {
         return res.status(400).json({ ok: false, message: 'No file uploaded.' });
     }
     const inputPath = req.file.path;
-    const outputName = 'defaced-' + req.file.filename;
+    const outputName = Date.now() + '-' + req.file.filename + '-defaced';
     const outputPath = path.join(outputFolder, outputName);
     const pythonPath = config.pythonPath
     let lastProgress = 0;
@@ -113,18 +114,18 @@ app.post('/upload', upload.single('video'), (req, res) => { //file upload endpoi
         }
     });
 });
-
+//////
 app.get('/download-outputs', (req, res) => { //file download endpoint
-
-    const filename = req.params.filename;
-    if (fileName.includes("..") || fileName.includes("/") || fileName.includes("\\")) {
+    console.log("Download request:", req.query);
+    const filename = req.query.name;
+    if (filename.includes("..") || filename.includes("/") || filename.includes("\\") || !filename) {
         return res.status(400).json({ ok: false, message: "Invalid filename" });
     }
     const filePath = path.join(outputFolder, filename);
 
-    return res.download(filePath, fileName, err => {
+    return res.download(filePath, filename, err => {
         if (err) {
-            return res.status(500).json({ ok: false, message: "Errore durante il download del file." });
+            return res.status(500).json({ ok: false, message: "Download failed." });
         }
     })
 
@@ -147,19 +148,22 @@ app.get('/list-outputs', (req, res) => {
         return res.status(500).json({ ok: false, message: "Errore durante la lettura dei file." });
     }
 });
-app.get('/delete-output', (req, res) => { //delete output file endpoint
-    const filename = req.query.filename;
-    if (filename.includes("..") || filename.includes("/") || filename.includes("\\")) {
+/////
+app.get('/delete-outputs', (req, res) => { //delete output file endpoint
+    console.log("Delete output request:", req.query);
+    const filename = req.query.name;
+    if (!filename || filename.includes("..") || filename.includes("/") || filename.includes("\\")) {
         return res.status(400).json({ ok: false, message: "Invalid filename" });
     }
     const filePath = path.join(outputFolder, filename);
     fs.unlink(filePath, err => {
         if (err) {
-            return res.status(500).json({ ok: false, message: "Errore durante l'eliminazione del file." });
+            return res.status(500).json({ ok: false, message: "Error deleting file." });
         }
-        return res.json({ ok: true, message: "File eliminato con successo." });
+        return res.json({ ok: true, message: "File deleted successfully" });
     });
 });
+//////
 app.get("/progress", (req, res) => { //progress endpoint
 
     res.setHeader("Content-Type", "text/event-stream");
